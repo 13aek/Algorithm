@@ -42,7 +42,7 @@ jobs:
           fi
           echo "Changed files:"; cat changed_files.txt || true
 
-      - name: Filter & sync ONLY allowlisted problems
+      - name: Filter & sync ONLY allowlisted problems (number or name)
         run: |
           python << 'PY'
           import os, re, shutil, yaml, pathlib, sys
@@ -56,25 +56,53 @@ jobs:
           with open(allow_path, "r", encoding="utf-8") as f:
             allow = yaml.safe_load(f) or {}
           plat = allow.get("platforms", {}) or {}
-          allow_boj  = set(map(str, plat.get("boj",  [])))
-          allow_swea = set(map(str, plat.get("swea", [])))
+
+          allow_boj_nums   = set(map(str, plat.get("boj",  [])))
+          allow_swea_nums  = set(map(str, plat.get("swea", [])))
+          allow_boj_names  = [str(x) for x in plat.get("boj_names",  [])]
+          allow_swea_names = [str(x) for x in plat.get("swea_names", [])]
 
           # 변경 파일 목록
+          changed = []
           try:
             with open("changed_files.txt", "r", encoding="utf-8") as f:
               changed = [line.strip() for line in f if line.strip()]
           except FileNotFoundError:
-            changed = []
+            pass
 
-          # 숫자 토큰(2~6자리) 추출 → allowlist 숫자와 교집합 여부로 판정
-          num_token = re.compile(r'(?<!\\d)(\\d{2,6})(?!\\d)')
+          # 첫 실행 등 diff가 비면 BOJ/SWEA 폴더를 전체 스캔
+          if not changed:
+            for root in ["BOJ", "boj", "백준", "SWEA", "swea"]:
+              if os.path.isdir(root):
+                for dp, _, fns in os.walk(root):
+                  for fn in fns:
+                    changed.append(os.path.join(dp, fn))
+
+          # 숫자 토큰(2~6자리) 추출
+          num_token = re.compile(r'(?<!\d)(\d{2,6})(?!\d)')
 
           def has_allow_number(path):
             nums = set(num_token.findall(path))
-            return bool(nums & allow_boj) or bool(nums & allow_swea)
+            return bool(nums & allow_boj_nums) or bool(nums & allow_swea_nums)
 
-          selected = [p for p in changed if os.path.isfile(p) and has_allow_number(p)]
-          print("Selected files:", *selected, sep="\\n")
+          def has_allow_name(path):
+            lower = path.lower()
+            raw = path
+            for kw in allow_boj_names + allow_swea_names:
+              if kw and (kw.lower() in lower or kw in raw):
+                return True
+            return False
+
+          selected = []
+          for p in changed:
+            if not os.path.isfile(p):
+              continue
+            p_norm = p.replace("\\", "/")
+            if has_allow_number(p_norm) or has_allow_name(p_norm):
+              selected.append(p)
+
+          print("Changed files:", *changed, sep="\n")
+          print("Selected files:", *selected, sep="\n")
 
           if not selected:
             sys.exit(0)
