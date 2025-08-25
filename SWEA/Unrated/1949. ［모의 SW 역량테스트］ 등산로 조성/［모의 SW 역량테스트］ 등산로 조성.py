@@ -2,7 +2,7 @@
 def long_road(arr, x, y, k, delta=4):
     """ 
     이중배열과 가장 높은 산봉우리의 위치 row, col을 인자로 받아서
-    그 산봉우리에서 가장 긴 등산로의 길이를 반환 
+    그 산봉우리에서 가장 긴 등산로의 길이를 반환  
     """
     max_dis = 1
     for d in range(4):
