@@ -42,7 +42,7 @@ jobs:
           fi
           echo "Changed files:"; cat changed_files.txt || true
 
-      - name: Filter & sync ONLY allowlisted problems (number or name)
+      - name: Select & sync ONLY allowlisted problems (full scan, number or name)
         run: |
           python << 'PY'
           import os, re, shutil, yaml, pathlib, sys
@@ -52,57 +52,50 @@ jobs:
           actor = os.environ.get("GITHUB_ACTOR", "")
           dest_root = os.path.join(study_repo, "members", actor)
 
-          # allowlist 읽기
+          # 1) allowlist 로드
           with open(allow_path, "r", encoding="utf-8") as f:
             allow = yaml.safe_load(f) or {}
           plat = allow.get("platforms", {}) or {}
+          boj_nums   = set(map(str, plat.get("boj",  [])))
+          swea_nums  = set(map(str, plat.get("swea", [])))
+          boj_names  = [str(x) for x in plat.get("boj_names",  [])]
+          swea_names = [str(x) for x in plat.get("swea_names", [])]
 
-          allow_boj_nums   = set(map(str, plat.get("boj",  [])))
-          allow_swea_nums  = set(map(str, plat.get("swea", [])))
-          allow_boj_names  = [str(x) for x in plat.get("boj_names",  [])]
-          allow_swea_names = [str(x) for x in plat.get("swea_names", [])]
+          # 2) 후보 파일 전체 스캔 (BOJ/boj/백준/SWEA/swea 폴더만)
+          roots = ["BOJ", "boj", "백준", "SWEA", "swea"]
+          exts  = (".py", ".cpp", ".java", ".md", ".txt")
+          candidates = []
+          for root in roots:
+            if os.path.isdir(root):
+              for dp, _, fns in os.walk(root):
+                for fn in fns:
+                  if fn.endswith(exts):
+                    candidates.append(os.path.join(dp, fn))
 
-          # 변경 파일 목록
-          changed = []
-          try:
-            with open("changed_files.txt", "r", encoding="utf-8") as f:
-              changed = [line.strip() for line in f if line.strip()]
-          except FileNotFoundError:
-            pass
-
-          # 첫 실행 등 diff가 비면 BOJ/SWEA 폴더를 전체 스캔
-          if not changed:
-            for root in ["BOJ", "boj", "백준", "SWEA", "swea"]:
-              if os.path.isdir(root):
-                for dp, _, fns in os.walk(root):
-                  for fn in fns:
-                    changed.append(os.path.join(dp, fn))
-
-          # 숫자 토큰(2~6자리) 추출
+          # 3) 숫자/이름 매칭
           num_token = re.compile(r'(?<!\d)(\d{2,6})(?!\d)')
 
-          def has_allow_number(path):
+          def has_num(path):
             nums = set(num_token.findall(path))
-            return bool(nums & allow_boj_nums) or bool(nums & allow_swea_nums)
+            return bool(nums & boj_nums) or bool(nums & swea_nums)
 
-          def has_allow_name(path):
-            lower = path.lower()
-            raw = path
-            for kw in allow_boj_names + allow_swea_names:
-              if kw and (kw.lower() in lower or kw in raw):
+          def has_name(path):
+            # 언더스코어를 공백처럼 취급해 부분일치 강화
+            raw   = path
+            lower = raw.lower().replace("_", " ")
+            for kw in boj_names + swea_names:
+              if not kw: 
+                continue
+              if kw.lower() in lower or kw in raw:
                 return True
             return False
 
-          selected = []
-          for p in changed:
-            if not os.path.isfile(p):
-              continue
-            p_norm = p.replace("\\", "/")
-            if has_allow_number(p_norm) or has_allow_name(p_norm):
-              selected.append(p)
+          selected = [p for p in candidates if has_num(p.replace("\\","/")) or has_name(p)]
 
-          print("Changed files:", *changed, sep="\n")
-          print("Selected files:", *selected, sep="\n")
+          print(f"ALLOW stats -> BOJ#:{len(boj_nums)} SWEA#:{len(swea_nums)} BOJname:{len(boj_names)} SWEAname:{len(swea_names)}")
+          print("CANDIDATES:", len(candidates))
+          for i, p in enumerate(selected, 1):
+            print(f"SELECTED[{i}]: {p}")
 
           if not selected:
             sys.exit(0)
