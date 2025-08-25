@@ -1,8 +1,8 @@
 name: Sync BOJ & SWEA to study repo
 
 on:
-  push:
-    branches: [ master ]  # 개인 레포 기본 브랜치명에 맞게 수정
+  push: 
+    branches: ["main", "master" ]  # 개인 레포 기본 브랜치명에 맞게 수정
     paths:
       - 'BOJ/**'
       - 'boj/**'
