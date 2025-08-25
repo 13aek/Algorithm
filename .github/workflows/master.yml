@@ -1,0 +1,62 @@
+name: Sync BOJ & SWEA to study repo
+
+on:
+  push:
+    branches: [ master ]  # 개인 레포 기본 브랜치명에 맞게 수정
+    paths:
+      - 'BOJ/**'
+      - 'boj/**'
+      - 'SWEA/**'
+      - 'swea/**'
+      - '**.py'
+      - '**.cpp'
+      - '**.java'
+      - '**.md'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out personal repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Clone study repo
+        env:
+          STUDY_PAT: ${{ secrets.STUDY_PAT }}
+        run: |
+          # 스터디 레포 주소로 교체 (예: org-or-user/algostudy)
+          git clone --depth=1 "https://x-access-token:${STUDY_PAT}@github.com/13aek/algostudy.git"
+
+      - name: Copy BOJ & SWEA to members/{actor}/
+        run: |
+          ACTOR="${{ github.actor }}"
+          SRC="$PWD"
+          DEST="$PWD/algostudy/members/${ACTOR}"
+
+          mkdir -p "${DEST}"
+
+          # BOJ / SWEA 폴더가 있으면 그대로 동기화 (없으면 건너뜀)
+          rsync -av --delete --ignore-missing-args \
+            "${SRC}/BOJ/" "${DEST}/BOJ/" \
+            "${SRC}/boj/" "${DEST}/boj/" \
+            "${SRC}/SWEA/" "${DEST}/SWEA/" \
+            "${SRC}/swea/" "${DEST}/swea/" || true
+
+      - name: Commit & Push to study repo
+        working-directory: algostudy
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "sync: ${{ github.actor }} BOJ/SWEA from ${{ github.repository }}@${GITHUB_SHA::7}"
+            git push origin main   # 스터디 레포 기본 브랜치명에 맞게 수정
+          else
+            echo "No changes to sync."
+          fi
