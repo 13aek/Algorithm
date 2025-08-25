@@ -55,8 +55,8 @@ jobs:
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             git add -A
-            git commit -m "sync: ${{ github.actor }} BOJ/SWEA from ${{ github.repository }}@${GITHUB_SHA::7}"
-            git push origin main   # 스터디 레포 기본 브랜치명에 맞게 수정
+            git commit -m "sync: ${{ github.actor }} from ${{ github.repository }}@${GITHUB_SHA::7}"
+            git push origin master   # 스터디 레포 기본 브랜치명에 맞게 수정
           else
             echo "No changes to sync."
           fi
