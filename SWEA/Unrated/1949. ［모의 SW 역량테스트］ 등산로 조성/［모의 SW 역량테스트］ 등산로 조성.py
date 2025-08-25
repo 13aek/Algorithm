@@ -52,7 +52,7 @@ for tc in range(1, T+1):
     # 등산로 배열을 탐색
     for r in range(N):
         for c in range(N):
-            # 만약 현재 위치가 가장 높은 위치의 산봉우리면
+            # 현재 위치가 가장 높은 위치의 산봉우리면
             if mountain_map[r][c] == maximum:
                 visited[r][c] = True
                 max_length = max(max_length, long_road(mountain_map, r, c, K))
