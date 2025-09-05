@@ -60,7 +60,7 @@ def calc_max(arr):
             for c in range(N-M+1):
                 pr1 = arr[r][c]
                 for rr in range(r, N):
-                    
+
                     pr1_c = 0
                     
                     if rr == r:
