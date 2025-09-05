@@ -1,4 +1,3 @@
-# DFS 탐색 함수 정의
 def dfs(current_student, adj_lst):
     global visited
 
@@ -19,11 +18,9 @@ for tc in range(1, T+1):
     compare_h = [list(map(int, input().split())) for _ in range(M)]
 
     adj_list_t = [[] for _ in range(N+1)]
-    for com in compare_h:
-        adj_list_t[com[0]] += [com[1]]
-
     adj_list_s = [[] for _ in range(N + 1)]
     for com in compare_h:
+        adj_list_t[com[0]] += [com[1]]
         adj_list_s[com[1]] += [com[0]]
 
     cnt = 0
