@@ -1,18 +1,18 @@
 import sys
-from heapq import heappop, heappush
+import heapq
 
 
-def dijkstra(start_nodes, lim):
+def dijkstra(start_nodes):
     dist = [float('inf')] * (V + 1)
     pq = []
 
     for s in start_nodes:
         if dist[s] > 0:
             dist[s] = 0
-            heappush(pq, (0, s))
+            heapq.heappush(pq, (0, s))
 
     while pq:
-        d, u = heappop(pq)
+        d, u = heapq.heappop(pq)
 
         if d > dist[u]:
             continue
@@ -20,9 +20,8 @@ def dijkstra(start_nodes, lim):
         for v, w in adj_list[u]:
             nd = d + w
             if nd < dist[v]:
-                if nd <= lim:
-                    dist[v] = nd
-                    heappush(pq, (nd, v))
+                dist[v] = nd
+                heapq.heappush(pq, (nd, v))
 
     return dist
 
@@ -48,8 +47,8 @@ for a in m_v:
 for b in s_v:
     is_store[b] = True
 
-dm = dijkstra(m_v, x)
-ds = dijkstra(s_v, y)
+dm = dijkstra(m_v)
+ds = dijkstra(s_v)
 
 ans = float('inf')
 for v in range(1, V+1):
