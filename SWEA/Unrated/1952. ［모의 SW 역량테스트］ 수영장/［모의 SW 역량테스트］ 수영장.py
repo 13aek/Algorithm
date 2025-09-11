@@ -12,7 +12,11 @@ def dfs(cur_fee, cur_idx):
     # 2. cur_fee 가 min_fee 보다 커지면
     if cur_fee >= min_fee:
         return
-    
+
+    # plan[cur_idx] 가 0이면 다음달로
+    if plan[cur_idx] == 0:
+        dfs(cur_fee, cur_idx + 1)
+
     # 1일권
     dfs(cur_fee + fee[0] * plan[cur_idx], cur_idx + 1)
     # 1달권
