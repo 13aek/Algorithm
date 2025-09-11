@@ -21,9 +21,9 @@ def backtrack(arr, cur_r, cur_c, cur_percent):
     # 다음 직원으로
     nr = cur_r + 1
 
-    # 공장 순회
+    # duf 순회
     for nc in range(N):
-        # 방문하지 않은 일이고 그 일의 확률이 0이 아니면
+        # 처리하지 않은 일이고 그 일의 확률이 0이 아니면
         if not visited[nc] and arr[nr][nc] != 0:
             # 현재 퍼센트 * 다음 퍼센트
             n_percent = cur_percent * (arr[nr][nc] / 100)
@@ -42,11 +42,11 @@ for tc in range(1, T + 1):
     Pij = [list(map(int, input().split())) for _ in range(N)]
 
     max_percent = 0
-
+    visited = [False] * N
     for c in range(N):
         if Pij[0][c] != 0:
-            visited = [False] * N
             percent_c = Pij[0][c] / 100
             backtrack(Pij, 0, c, percent_c)
+            visited[c] = False
 
     print(f"#{tc} {(max_percent * 100):.6f}")
