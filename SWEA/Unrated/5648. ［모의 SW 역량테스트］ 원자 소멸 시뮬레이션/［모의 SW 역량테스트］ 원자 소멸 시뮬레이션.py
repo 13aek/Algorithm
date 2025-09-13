@@ -2,37 +2,43 @@
 drc = [(0, 1), (0, -1), (-1, 0), (1, 0)]
 
 
-def simulate(atoms):
-    total_energy = 0
+def simulate(dic):
+    global energy_burst
 
-    while atoms:
-        bucket = {}
+    cur_pp = power_plant
 
-        for (x, y), (d, e) in atoms.items():
-            nx = x + drc[d][0]
-            ny = y + drc[d][1]
+    while cur_pp:
 
-            if nx < -2000 or nx > 2000 or ny < -2000 or ny > 2000:
+        next_pp = {}
+
+        # 1초 후 원자 일괄 이동
+        for (x, y), (d, e) in cur_pp.items():
+            nx, ny = x + drc[d][0], y + drc[d][1]
+
+            # 경계 밖 원자는 소멸
+            if -2000 > nx or nx > 2000 or -2000 > ny or ny > 2000:
                 continue
 
-            if (nx, ny) in bucket:
-                cnt, esum, sd, se = bucket[(nx, ny)]
-                cnt += 1
-                esum += e
-                bucket[(nx, ny)] = [cnt, esum, sd, se]
+            key = (nx, ny)
+            # 1. next_pp 에 이미 있는 경우 (충돌) 합쳐줌
+            if key in next_pp:
+                next_pp[key][0] += e    # energy
+                next_pp[key][1] += 1    # count
+
+            # 2. next_pp 에 들어가 있지 않은 경우
             else:
-                bucket[(nx, ny)] = [1, e, d, e]
+                # energy 합, count (해당 위치 원자 개수), 진행방향
+                next_pp[key] = [e, 1, d]
 
-        next_atoms = {}
-        for (x, y), (cnt, esum, sd, se) in bucket.items():
-            if cnt >= 2:
-                total_energy += esum
+        # 원자 일괄 이동이 끝나고 다음 원자 구성
+        cur_pp = {}
+        for position, (e_sum, cnt, direction) in next_pp.items():
+            # 해당 위치의 원자 개수가 1개 초과일 때 (충돌했을 경우)
+            if cnt > 1:
+                energy_burst += e_sum
+            # 충돌이 없을 때
             else:
-                next_atoms[(x, y)] = (sd, se)
-
-        atoms = next_atoms
-
-    return total_energy
+                cur_pp[position] = (direction, e_sum)
 
 
 T = int(input())
@@ -41,10 +47,13 @@ for tc in range(1, T+1):
     N = int(input())
     atomic_info = [list(map(int, input().split())) for _ in range(N)]
 
+    # 0.5초 충돌 계산을 위해 좌표값을 2배로 딕셔너리에 저장장
     power_plant = {}
     for a, b, d, c in atomic_info:
-        power_plant[(a * 2, b * 2)] = (d, c)
+        power_plant[(a * 2, b * 2)] = [d, c]
 
-    ans = simulate(power_plant)
+    energy_burst = 0
 
-    print(f"#{tc} {ans}")
+    simulate(power_plant)
+
+    print(f"#{tc} {energy_burst}")
