@@ -71,18 +71,19 @@ def solution(board):
                         q.append(((r2, c2), (r2 + d_row, c2), t + 1))
 
         # 2. 수직일 때: 왼쪽 / 오른쪽 회전
-        for d_col in [-1, 1]:
-            # 두 칸 좌/우가 모두 비어 있어야 회전 가능
-            if free(r1, c1 + d_col) and free(r2, c2 + d_col):
-                # 위를 축으로 회전
-                # 1. (r1, c1) 을 축으로
-                nxt1 = normalize((r1, c1), (r1, c1 + d_col))
-                if nxt1 not in visited:
-                    visited.add(nxt1)
-                    q.append(((r1, c1), (r1, c1 + d_col), t + 1))
-                # 아래를 축으로 회전
-                # 2. (r2, c2)을 축으로
-                nxt2 = normalize((r2, c2), (r2, c2 + d_col))
-                if nxt2 not in visited:
-                    visited.add(nxt2)
-                    q.append(((r2, c2), (r2, c2 + d_col), t + 1))
+        if vertical:
+            for d_col in [-1, 1]:
+                # 두 칸 좌/우가 모두 비어 있어야 회전 가능
+                if free(r1, c1 + d_col) and free(r2, c2 + d_col):
+                    # 위를 축으로 회전
+                    # 1. (r1, c1) 을 축으로
+                    nxt1 = normalize((r1, c1), (r1, c1 + d_col))
+                    if nxt1 not in visited:
+                        visited.add(nxt1)
+                        q.append(((r1, c1), (r1, c1 + d_col), t + 1))
+                    # 아래를 축으로 회전
+                    # 2. (r2, c2)을 축으로
+                    nxt2 = normalize((r2, c2), (r2, c2 + d_col))
+                    if nxt2 not in visited:
+                        visited.add(nxt2)
+                        q.append(((r2, c2), (r2, c2 + d_col), t + 1))
