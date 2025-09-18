@@ -34,10 +34,10 @@ while q:
 
     if cx == dx and cy <= dy <= ey:
         min_cnt = min(min_cnt, bc)
-        continue
+        break
     elif cy == dy and cx <= dx <= ex:
         min_cnt = min(min_cnt, bc)
-        continue
+        break
 
     # 1. 현재 버스 노선이 수직일 때
     if cx == ex:
