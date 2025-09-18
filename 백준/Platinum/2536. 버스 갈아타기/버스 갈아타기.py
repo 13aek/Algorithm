@@ -32,9 +32,6 @@ while q:
     if bc > min_cnt:
         continue
 
-    if bc > transfer_cnt[bi]:
-        continue
-
     if cx == dx and cy <= dy <= ey:
         min_cnt = min(min_cnt, bc)
         continue
@@ -48,14 +45,14 @@ while q:
             (ncx, ncy), (nex, ney) = bus_lines[i]
             # 1.1 다음 버스 노선이 수직이고, 현재 노선이랑 같은 x 좌표라면
             if ncx == nex and ncx == cx:
-                # 겹치는 범위가 있다면
+                # 겹치는 범위가 있다면 (이 부분 조건 설정)
                 if max(cy, ncy) <= min(ey, ney):
                     if bc + 1 < transfer_cnt[i]:
                         transfer_cnt[i] = bc + 1
                         q.append((bc + 1, i, ncx, ncy, nex, ney))
             # 1.2 다음 버스 노선이 수평이면
             elif ncy == ney:
-                # 현재 x 좌표가 다음 버스 노선이랑 겹친다면
+                # 현재 x 좌표가 다음 버스 노선이랑 겹친다면 (이 부분 범위 설정)
                 if ncx <= cx <= nex and cy <= ncy <= ey:
                     if bc + 1 < transfer_cnt[i]:
                         transfer_cnt[i] = bc + 1
@@ -67,12 +64,14 @@ while q:
             (ncx, ncy), (nex, ney) = bus_lines[i]
             # 2.1 다음 버스 노선이 수평이고, 현재 노선이랑 같은 y 좌표라면
             if ncy == ney and ncy == cy:
+                # (이 부분 조건 설정)
                 if max(cx, ncx) <= min(ex, nex):
                     if bc + 1 < transfer_cnt[i]:
                         transfer_cnt[i] = bc + 1
                         q.append((bc + 1, i, ncx, ncy, nex, ney))
             # 2.2 다음 버스 노선이 수직이면
             elif ncx == nex:
+                # (이 부분 범위 설정)
                 if ncy <= cy <= ney and cx <= ncx <= ex:
                     if bc + 1 < transfer_cnt[i]:
                         transfer_cnt[i] = bc + 1
