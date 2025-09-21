@@ -1,7 +1,13 @@
 from heapq import heappush, heappop
 
-# 델타 방향 정의 (상하좌우)
-drc = {0: (-1, 0), 1: (1, 0), 3: (0, -1), 4: (0, 1)}
+# 델타 방향 정의 (상우하좌)
+drc = {0: (-1, 0), 2: (1, 0), 3: (0, -1), 1: (0, 1)}
+
+
+def rot_cost(d, nd):
+    delta = (nd - d) % 4
+    rot = min(delta, 4 - delta)
+    return rot + 1
 
 
 def bfs():
@@ -28,32 +34,22 @@ def bfs():
             min_cnt = cur_cnt
             return
 
-        for i in [0, 1, 3, 4]:
+        for i in range(4):
             nr, nc = cr + drc[i][0], cc + drc[i][1]
 
             if 0 <= nr < N and 0 <= nc < N:
+                cost = rot_cost(cur_d, i)
                 if field[nr][nc] != 'T':
-                    if cur_d == i:
-                        ncost, nk, nd = cur_cnt + 1, cur_k, cur_d
-                    elif abs(cur_d - i) == 1:
-                        ncost, nk, nd = cur_cnt + 3, cur_k, i
-                    else:
-                        ncost, nk, nd = cur_cnt + 2, cur_k, i
+                    ncost, nk = cur_cnt + cost, cur_k
                 else:
-                    if cur_k:
-                        if cur_d == i:
-                            ncost, nk, nd = cur_cnt + 1, cur_k - 1, cur_d
-                        elif abs(cur_d - i) == 1:
-                            ncost, nk, nd = cur_cnt + 3, cur_k - 1, i
-                        else:
-                            ncost, nk, nd = cur_cnt + 2, cur_k - 1, i
-                    else:
+                    if not cur_k:
                         continue
+                    ncost, nk = cur_cnt + cost, cur_k - 1
 
-                nkey = (nr, nc, nd, nk)
+                nkey = (nr, nc, i, nk)
                 if ncost < best.get(nkey, float('inf')):
                     best[nkey] = ncost
-                    heappush(pq, (ncost, nk, nd, nr, nc))
+                    heappush(pq, (ncost, nk, i, nr, nc))
 
 
 for tc in range(1, int(input()) + 1):
