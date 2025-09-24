@@ -1,5 +1,4 @@
 from itertools import permutations
-from collections import deque
 
 
 # 계단까지의 거리 구하는 함수
@@ -9,29 +8,30 @@ def distance(pr, pc, sr, sc):
 
 def simulate(stair, people_lst):
     sr, sc = stair
+    k = room[sr][sc]
+    wait_time = 0
+
     dist = []
     for pr, pc in people_lst:
         dist.append(distance(pr, pc, sr, sc))
     dist.sort()
-    d = deque(dist)
-    q = deque()
-    wait_time = 0
-    k = room[sr][sc]
+
+    q = []
 
     while True:
-        if len(q) < 3 and d:
-            q.append(d.popleft())
-        elif len(q) >= 3 and d:
-            if q[0] + k <= d[0] + wait_time:
-                q.popleft()
-                q.append(d.popleft() + wait_time)
+        if len(q) < 3 and dist:
+            q.append(dist.pop(0))
+        elif len(q) >= 3 and dist:
+            if q[0] + k <= dist[0] + wait_time:
+                q.pop(0)
+                q.append(dist.pop(0) + wait_time)
                 wait_time = 0
             else:
                 wait_time += 1
-        elif not d:
+        elif not dist:
             time = []
             while q:
-                time.append(q.popleft())
+                time.append(q.pop(0))
             return max(time) + k + 1
 
 
@@ -55,10 +55,7 @@ for tc in range(1, int(input()) + 1):
             A = perm
             B = list(set(people) - set(perm))
 
-            perm_time1 = max(simulate(stairs[0], A), simulate(stairs[1], B))
-            perm_time2 = max(simulate(stairs[0], B), simulate(stairs[1], A))
-
-            perm_time = min(perm_time1, perm_time2)
+            perm_time = max(simulate(stairs[0], A), simulate(stairs[1], B))
 
             if perm_time < min_time:
                 min_time = perm_time
