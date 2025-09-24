@@ -1,16 +1,16 @@
-from itertools import permutations
+from itertools import product
 
 
-# 계단까지의 거리 구하는 함수
 def distance(pr, pc, sr, sc):
     return abs(pr - sr) + abs(pc - sc)
 
 
 def simulate(stair, people_lst):
+    if not people_lst:
+        return 0
+
     sr, sc = stair
     k = room[sr][sc]
-    wait_time = 0
-    cur_time = 0
 
     dist = []
     for pr, pc in people_lst:
@@ -18,17 +18,13 @@ def simulate(stair, people_lst):
     dist.sort()
 
     q = []
-
-    while dist:
+    for arrival in dist:
         if len(q) == 3:
-            if q[0] <= dist[0] + wait_time:
-                q.pop(0)
-                q.append(dist.pop(0) + wait_time + k)
-                wait_time = 0
-            else:
-                wait_time += 1
+            first_finish = q.pop(0)
+            start_time = max(first_finish, arrival)
         else:
-            q.append(dist.pop(0) + k)
+            start_time = arrival
+        q.append(start_time + k)
 
     return max(q) + 1
 
@@ -48,14 +44,14 @@ for tc in range(1, int(input()) + 1):
 
     min_time = min(simulate(stairs[0], people), simulate(stairs[1], people))
 
-    for i in range(1, len(people)):
-        for perm in permutations(people, i):
-            A = perm
-            B = list(set(people) - set(perm))
+    for choice in product([0, 1], repeat=len(people)):
+        groupA = [people[i] for i in range(len(people)) if choice[i] == 0]
+        groupB = [people[i] for i in range(len(people)) if choice[i] == 1]
 
-            perm_time = max(simulate(stairs[0], A), simulate(stairs[1], B))
+        timeA = simulate(stairs[0], groupA)
+        timeB = simulate(stairs[1], groupB)
 
-            if perm_time < min_time:
-                min_time = perm_time
+        total_time = max(timeA, timeB)
+        min_time = min(min_time, total_time)
 
     print(f"#{tc} {min_time}")
