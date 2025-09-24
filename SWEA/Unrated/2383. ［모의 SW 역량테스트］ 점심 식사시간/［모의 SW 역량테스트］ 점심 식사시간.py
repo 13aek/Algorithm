@@ -10,6 +10,7 @@ def simulate(stair, people_lst):
     sr, sc = stair
     k = room[sr][sc]
     wait_time = 0
+    cur_time = 0
 
     dist = []
     for pr, pc in people_lst:
@@ -18,21 +19,18 @@ def simulate(stair, people_lst):
 
     q = []
 
-    while True:
-        if len(q) < 3 and dist:
-            q.append(dist.pop(0))
-        elif len(q) >= 3 and dist:
-            if q[0] + k <= dist[0] + wait_time:
+    while dist:
+        if len(q) == 3:
+            if q[0] <= dist[0] + wait_time:
                 q.pop(0)
-                q.append(dist.pop(0) + wait_time)
+                q.append(dist.pop(0) + wait_time + k)
                 wait_time = 0
             else:
                 wait_time += 1
-        elif not dist:
-            time = []
-            while q:
-                time.append(q.pop(0))
-            return max(time) + k + 1
+        else:
+            q.append(dist.pop(0) + k)
+
+    return max(q) + 1
 
 
 for tc in range(1, int(input()) + 1):
