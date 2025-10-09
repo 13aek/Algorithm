@@ -11,7 +11,8 @@ dc = [0, 0, -1, 1]
 def bfs(labor, visit):
     q = deque(virus)
     cnt = 0
-
+    safe = len(blank) - 3
+    
     while q:
         cr, cc = q.popleft()
 
@@ -22,13 +23,16 @@ def bfs(labor, visit):
                 labor[nr][nc] = 2
                 visit[blank.index((nr, nc))] = True
                 q.append((nr, nc))
+                safe -= 1
+                if safe <= answer:
+                    return 0
 
     cnt = visit.count(False)
 
     return cnt
 
 
-def dfs(wall_count, visited, laboratory):
+def dfs(wall_count, start, visited, laboratory):
     global answer
 
     if wall_count == 3:
@@ -38,11 +42,12 @@ def dfs(wall_count, visited, laboratory):
         answer = max(answer, count)
         return
 
-    for i, (r, c) in enumerate(blank):
+    for i in range(start, len(blank)):
         if not visited[i]:
+            r, c = blank[i]
             visited[i] = True
             laboratory[r][c] = 1
-            dfs(wall_count + 1, visited, laboratory)
+            dfs(wall_count + 1, i + 1, visited, laboratory)
             laboratory[r][c] = 0
             visited[i] = False
 
@@ -59,5 +64,5 @@ for r in range(N):
             blank.append((r, c))
 answer = 0
 visited = [False] * len(blank)
-dfs(0, visited, grid)
+dfs(0, 0, visited, grid)
 print(answer)
