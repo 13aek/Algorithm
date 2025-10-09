@@ -8,11 +8,10 @@ dr = [-1, 1, 0, 0]
 dc = [0, 0, -1, 1]
 
 
-def bfs(labor, visit):
+def bfs(labor):
     q = deque(virus)
-    cnt = 0
     safe = len(blank) - 3
-    
+
     while q:
         cr, cc = q.popleft()
 
@@ -21,15 +20,12 @@ def bfs(labor, visit):
 
             if (0 <= nr < N and 0 <= nc < M) and labor[nr][nc] == 0:
                 labor[nr][nc] = 2
-                visit[blank.index((nr, nc))] = True
                 q.append((nr, nc))
                 safe -= 1
                 if safe <= answer:
                     return 0
 
-    cnt = visit.count(False)
-
-    return cnt
+    return safe
 
 
 def dfs(wall_count, start, visited, laboratory):
@@ -37,8 +33,7 @@ def dfs(wall_count, start, visited, laboratory):
 
     if wall_count == 3:
         lab = [row[:] for row in laboratory]
-        visit = visited[:]
-        count = bfs(lab, visit)
+        count = bfs(lab)
         answer = max(answer, count)
         return
 
