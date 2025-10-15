@@ -1,5 +1,5 @@
 import sys
-from heapq import heappop, heappush
+from collections import deque
 
 line = sys.stdin.readline
 
@@ -11,20 +11,19 @@ dc = [0, 0, -1, 1]
 def bfs(virus_place):
     visited = [[False] * N for _ in range(N)]
     check = 0
-    pq = []
+    q = deque()
     for i in range(len(virus)):
         if virus_place[i]:
             r, c, t = virus[i]
             visited[r][c] = True
-            heappush(pq, (t, r, c))
+            q.append((t, r, c))
         else:
             r, c, _ = virus[i]
             visited[r][c] = '*'
     result = 0
 
-    while pq:
-        ct, cr, cc = heappop(pq)
-        # ct, cr, cc = q.popleft()
+    while q:
+        ct, cr, cc = q.popleft()
 
         if result >= answer:
             return float('inf')
@@ -36,11 +35,11 @@ def bfs(virus_place):
                 if not visited[nr][nc]:
                     visited[nr][nc] = True
                     check += 1
-                    heappush(pq, (ct + 1, nr, nc))
+                    q.append((ct + 1, nr, nc))
                     result = ct + 1
                 elif visited[nr][nc] == '*':
                     visited[nr][nc] = True
-                    heappush(pq, (ct + 1, nr, nc))
+                    q.append((ct + 1, nr, nc))
 
     if check == blank:
         return result
@@ -61,7 +60,6 @@ def dfs(virus_count, start, lab, visited_virus):
             visited_virus[i] = True
             dfs(virus_count - 1, i + 1, lab, visited_virus)
             visited_virus[i] = False
-
 
 
 N, M = map(int, line().split())
