@@ -51,6 +51,9 @@ polyomino = {
 N, M = map(int, line().split())
 numbers = [list(map(int, line().split())) for _ in range(N)]
 
+# 추가 코드 (속도를 줄이기 위한?)
+m = max([max(l) for l in numbers])
+
 answer = 0
 for r in range(N):
     for c in range(M):
@@ -58,10 +61,14 @@ for r in range(N):
 
         for i in range(1, 6):
             for poly in polyomino[i]:
-                p_score = 0
+                p_score = numbers[r][c]
+                cnt = 1
                 for p in poly:
                     nr, nc = r + p[0], c + p[1]
 
+                    if p_score + (4 - cnt) * m <= answer:
+                        break
+                        
                     if (nr, nc) in impossible:
                         break
 
@@ -70,9 +77,9 @@ for r in range(N):
                         break
 
                     p_score += numbers[nr][nc]
+                    cnt += 1
 
                 else:
-                    p_score += numbers[r][c]
                     if p_score > answer:
                         answer = p_score
 
