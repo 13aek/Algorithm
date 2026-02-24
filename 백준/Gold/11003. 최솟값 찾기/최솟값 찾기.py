@@ -1,25 +1,27 @@
-# BOJ Gold 1 11003_최솟값_찾기
-
 import sys
 from collections import deque
 
 input = sys.stdin.readline
+write = sys.stdout.write
 
 N, L = map(int, input().split())
+arr = list(map(int, input().split()))
 
-q = deque()
+dq = deque()
+result = []
 
-i = 0
-
-for number in map(int, input().split()):
-    i += 1
+for i in range(N):
     
-    while q and q[-1][0] > number:
-        q.pop()
-
-    q.append((number, i))
-
-    if q[0][1] < i - L + 1:
-        q.popleft()
+    # 현재 값보다 큰 값은 제거
+    while dq and arr[dq[-1]] > arr[i]:
+        dq.pop()
     
-    print(q[0][0], end=' ')
+    dq.append(i)  # 인덱스만 저장
+    
+    # 범위 벗어난 인덱스 제거
+    if dq[0] < i - L + 1:
+        dq.popleft()
+    
+    result.append(str(arr[dq[0]]))
+
+write(" ".join(result))
